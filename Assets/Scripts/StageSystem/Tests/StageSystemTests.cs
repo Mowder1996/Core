@@ -1,6 +1,7 @@
 using Common.Tests;
 using NUnit.Framework;
-using StageSystem.Bootstrap;
+using StageSystem.Entities.Stages.Mock;
+using StageSystem.Entities.Stages.Mock.Main;
 using StageSystem.Interfaces;
 using UnityEngine;
 
@@ -18,12 +19,12 @@ namespace StageSystem.Tests
         [Test]
         public void InitialTest()
         {
-            var firstLayerStages = Container.ResolveIdAll<IStage>("First layer");
             var stageSystem = Container.Resolve<StageSystem>();
+            var firstLayerStages = Container.ResolveAll<MockMainStage>();
             
             stageSystem.Init(firstLayerStages);
 
-            var stageHierarchy = stageSystem.GetStageHierarchy("3");
+            var stageHierarchy = stageSystem.GetStageHierarchy("EditAmmoValues");
 
             var output = "";
 

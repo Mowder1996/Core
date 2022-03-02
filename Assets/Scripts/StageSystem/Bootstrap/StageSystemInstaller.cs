@@ -1,4 +1,5 @@
 using StageSystem.Entities;
+using StageSystem.Interfaces;
 using Zenject;
 
 namespace StageSystem.Bootstrap
@@ -21,6 +22,13 @@ namespace StageSystem.Bootstrap
         protected virtual void InstallStages()
         {
             
+        }
+
+        protected void InstallStage<TContract, TStage>() 
+            where TStage : TContract 
+            where TContract : IStage
+        {
+            Container.Bind<TContract>().To<TStage>().AsSingle();
         }
     }
 }
