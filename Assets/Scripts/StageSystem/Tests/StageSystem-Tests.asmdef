@@ -1,0 +1,23 @@
+{
+    "name": "StageSystem-Tests",
+    "rootNamespace": "",
+    "references": [
+        "GUID:508d020f9e2e5cf40980e9acaa3874f1",
+        "GUID:a2f2239355369ba4fb6909aeaa41def5",
+        "GUID:679b9a7f58efca14bbbf9692bf7683bf",
+        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4",
+        "GUID:ad02be6fbe349fd458c33fabf1edd522",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
