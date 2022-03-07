@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Interfaces;
@@ -37,7 +38,7 @@ namespace StageSystem.Services
 
             if (!stageHierarchy.Any())
             {
-                return null;
+                return Array.Empty<IStage>();
             }
             
             stageHierarchy.Reverse();
@@ -101,9 +102,9 @@ namespace StageSystem.Services
                     break;
                 }
 
-                var subStageHierarchy = GetStageHierarchyInternal(stageId, stage.SubStages).ToList();
+                var subStageHierarchy = GetStageHierarchyInternal(stageId, stage.SubStages)?.ToList();
 
-                if (!subStageHierarchy.Any())
+                if (subStageHierarchy == null || !subStageHierarchy.Any())
                 {
                     continue;
                 }
@@ -112,7 +113,9 @@ namespace StageSystem.Services
                 stagesHierarchy.AddRange(subStageHierarchy);
             }
 
-            return stagesHierarchy;
+            var isStageFounded = stagesHierarchy.Any(item => item.Id.Equals(stageId));
+            
+            return isStageFounded ? stagesHierarchy : new List<IStage>();
         }
 
         private IEnumerable<IStage> GetNextStagesOnSameLevel(IStage startStage, IStage parentStage)

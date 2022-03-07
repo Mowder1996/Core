@@ -1,58 +1,62 @@
-using System.Collections;
+using System.Linq;
 using Common.Tests;
 using NUnit.Framework;
+using StageSystem.Entities;
 using StageSystem.Entities.Stages.Mock;
 using StageSystem.Entities.Stages.Mock.Main;
 using StageSystem.Services;
-using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace StageSystem.Tests
 {
     public class StageSystemTests : BaseUnitTestFixture
     {
+        private StageOrganizerService _stageOrganizerService;
+        private StageSystemController _stageSystemController;
+        private StageSystemModel _stageSystemModel;
+
         public override void Setup()
         {
             base.Setup();
             
             Container.Install<MockStageSystemInstaller>();
+            
+            _stageOrganizerService = Container.Resolve<StageOrganizerService>();
+            _stageSystemController = Container.Resolve<StageSystemController>();
+            _stageSystemModel = Container.Resolve<StageSystemModel>();
+            
+            var firstLayerStages = Container.ResolveAll<MockMainStage>();
+            
+            _stageOrganizerService.Init(firstLayerStages);
         }
 
         [Test]
-        public void InitialTest()
+        public void StageSequenceIsEmptyIfStartStageNotExists()
         {
-            var stageSystem = Container.Resolve<StageSystem>();
-            var stageService = Container.Resolve<StageOrganizerService>();
-            var firstLayerStages = Container.ResolveAll<MockMainStage>();
+            var stageSequence = _stageOrganizerService.GetStageSequence("UndefinedStage");
             
-            stageSystem.Init(firstLayerStages);
-        
-            var stageHierarchy = stageService.GetStageSequence("SelectWeapon");
-        
-            var output = "";
-        
-            foreach (var stage in stageHierarchy)
-            {
-                output += stage.Id + "|";
-            }
-        
-            Debug.Log(output);
+            Assert.IsFalse(stageSequence.Any());
         }
-
-        [UnityTest]
-        public IEnumerator RestartStageTest()
+        
+        [Test]
+        public void ParentStageDontExecuteAfterSubStage()
         {
-            var stageSystem = Container.Resolve<StageSystem>();
-            var firstLayerStages = Container.ResolveAll<MockMainStage>();
-            
-            stageSystem.Init(firstLayerStages);
-            stageSystem.Play("MainMenu");
+            var stageHierarchy = _stageOrganizerService.GetStageHierarchy("SelectWeather").ToList();
+            var stageSequence = _stageOrganizerService.GetStageSequence("SelectWeather");
+            var stageParent = stageHierarchy[stageHierarchy.Count - 2];
 
-            yield return null;
-            yield return null;
-            yield return null;
+            var stageIsExist = false;
+
+            foreach (var stage in stageSequence)
+            {
+                if (stage.Id.Equals(stageParent.Id))
+                {
+                    stageIsExist = true;
+                    
+                    break;
+                }
+            }
             
-            stageSystem.Play("MainMenu");
+            Assert.IsFalse(stageIsExist);
         }
     }
 }

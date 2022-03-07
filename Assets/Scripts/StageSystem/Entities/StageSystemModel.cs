@@ -15,8 +15,6 @@ namespace StageSystem.Entities
         public void SetCurrentStage(IStage stage)
         {
             _currentStage.Value = stage;
-            
-            Debug.Log($"Current stage {stage.Id}");
         }
 
         public void SetSequenceStatus(StageSequenceStatus status)
