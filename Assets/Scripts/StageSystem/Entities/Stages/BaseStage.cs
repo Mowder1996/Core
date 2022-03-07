@@ -4,14 +4,14 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using StageSystem.Interfaces;
 
-namespace StageSystem.Entities
+namespace StageSystem.Entities.Stages
 {
     public class BaseStage : IStage, IDisposable
     {
-        public virtual string Id => "DefaultStage";
-
-        private List<IStage> _subStages = new List<IStage>();
+        private readonly List<IStage> _subStages = new List<IStage>();
         public IEnumerable<IStage> SubStages => _subStages;
+        
+        public virtual string Id => "UndefinedStage";
 
         protected CancellationTokenSource CancellationTokenSource;
 
@@ -25,12 +25,13 @@ namespace StageSystem.Entities
         {
             CancellationTokenSource = new CancellationTokenSource();
             
-            await UniTask.Yield();
+            await UniTask.Yield(CancellationTokenSource.Token);
         }
 
         public void Skip()
         {
             CancellationTokenSource.Cancel();
+            CancellationTokenSource?.Dispose();
         }
 
         public void Dispose()

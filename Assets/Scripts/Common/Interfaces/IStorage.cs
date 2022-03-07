@@ -1,7 +1,7 @@
 
 namespace Common.Interfaces
 {
-    public interface IInventory<TItem>
+    public interface IStorage<TItem>
     {
         int Count { get; }
         void Add(TItem item);

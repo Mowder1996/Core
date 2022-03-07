@@ -13,9 +13,8 @@ namespace StageSystem.Entities.Stages.Mock
     {
         protected override void InstallStages()
         {
-            base.InstallStages();
-
             InstallStage<MockMainStage, MockMainMenuStage>();
+            InstallStage<MockMainStage, MockGameStage>();
             
             InstallStage<MockMainMenuSubStage, MockSelectPlayerStage>();
             InstallStage<MockMainMenuSubStage, MockSelectWeaponStage>();
@@ -32,7 +31,7 @@ namespace StageSystem.Entities.Stages.Mock
             
             InstallStage<MockSelectMapSubStage, MockSelectEnvironmentStage>();
             InstallStage<MockSelectMapSubStage, MockSelectWeatherStage>();
-            
+
             InstallStage<MockSelectEnvironmentSubStage, MockEditBuildingsStage>();
             InstallStage<MockSelectEnvironmentSubStage, MockEditFloraStage>();
         }

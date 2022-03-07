@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Common.Interfaces;
 using StageSystem.Interfaces;
 
-namespace StageSystem.Entities
+namespace StageSystem.Storages
 {
-    public class StageInventory : IInventory<IStage>, IEnumerable<IStage>
+    public class StageStorage : IStorage<IStage>, IEnumerable<IStage>
     {
         private readonly List<IStage> _stages = new List<IStage>();
 

@@ -1,41 +1,49 @@
+using System;
 using System.Collections.Generic;
+using Common.Interfaces;
 using StageSystem.Entities;
 using StageSystem.Interfaces;
+using StageSystem.Services;
 
 namespace StageSystem
 {
-    public class StageSystem
+    public class StageSystem : IFacade
     {
-        private readonly StageInventory _stageInventory;
+        private readonly StageOrganizerService _stageOrganizerService;
+        private readonly StageSystemController _stageSystemController;
         private readonly StageSystemModel _stageSystemModel;
 
-        public StageSystem(StageInventory stageInventory, StageSystemModel stageSystemModel)
+        public StageSystem(StageOrganizerService stageOrganizerService, 
+                            StageSystemController stageSystemController, 
+                            StageSystemModel stageSystemModel)
         {
-            _stageInventory = stageInventory;
+            _stageOrganizerService = stageOrganizerService;
+            _stageSystemController = stageSystemController;
             _stageSystemModel = stageSystemModel;
         }
 
         public void Init(IEnumerable<IStage> stages)
         {
-            foreach (var stage in stages)
-            {
-                _stageInventory.Add(stage);
-            }
-        }
-        
-        public void StartStage(string stageId)
-        {
-
+            _stageOrganizerService.Init(stages);
         }
 
-        public void SkipCurrentStage(bool skipSubStageOnly = false)
+        public IObservable<IStage> ChangeStageAsObservable()
         {
+            return _stageSystemModel.CurrentStage;
+        }
+
+        public void Play(string startStageId)
+        {
+            _stageSystemController.StopSequence();
             
+            var stageSequence = _stageOrganizerService.GetStageSequence(startStageId);
+
+            _stageSystemController.PlaySequence(stageSequence);
         }
 
-        public IEnumerable<IStage> GetStageHierarchy(string stageId)
+        public void Stop()
         {
-            return _stageSystemModel.GetStageHierarchy(stageId);
+            _stageSystemController.StopSequence();
         }
     }
 }
