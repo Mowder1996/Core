@@ -27,7 +27,7 @@ namespace ContentLoader.Entities
 
         public IDisposable Subscribe(IObserver<float> observer)
         {
-            return _progressLoadSubject;
+            return _progressLoadSubject.Subscribe(observer);
         }
 
         public void Dispose()

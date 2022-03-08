@@ -11,17 +11,33 @@ namespace ContentLoader.Entities.LoadTasks
         public IObservable<float> ProgressStream => ProgressLoadStream;
         public LoadStatus Status { get; private set; } = LoadStatus.None;
 
-        protected CancellationTokenSource CancellationTokenSource;
         protected ProgressLoadStream ProgressLoadStream;
-        
-        public virtual UniTask Execute(string key)
+        protected CancellationTokenSource CancellationTokenSource;
+
+        private bool _isInitialized;
+
+        protected BaseLoadTask()
         {
+            Initialize();
+        }
+        
+        ~BaseLoadTask()
+        {
+            Dispose();
+        }
+
+        public virtual async UniTask Execute(string key)
+        {
+            if (!_isInitialized)
+            {
+                Initialize();
+            }
+
             SetStatus(LoadStatus.Process);
             
-            ProgressLoadStream = new ProgressLoadStream();
-            CancellationTokenSource = new CancellationTokenSource();
-
-            return Loading(key);
+            await Loading(key);
+            
+            Dispose();
         }
 
         public void Cancel()
@@ -30,10 +46,8 @@ namespace ContentLoader.Entities.LoadTasks
             {
                 SetStatus(LoadStatus.Cancelled);
             }
-
-            ProgressLoadStream = null;
-            CancellationTokenSource.Cancel();
-            CancellationTokenSource.Dispose();
+            
+            Dispose();
         }
 
         protected abstract UniTask Loading(string key);
@@ -41,6 +55,24 @@ namespace ContentLoader.Entities.LoadTasks
         protected void SetStatus(LoadStatus status)
         {
             Status = status;
+        }
+
+        private void Initialize()
+        {
+            ProgressLoadStream = new ProgressLoadStream();
+            CancellationTokenSource = new CancellationTokenSource();
+
+            _isInitialized = true;
+        }
+        
+        private void Dispose()
+        {
+            _isInitialized = false;
+            
+            ProgressLoadStream?.Dispose();
+            
+            CancellationTokenSource.Cancel();
+            CancellationTokenSource?.Dispose();
         }
     }
 }

@@ -1,39 +1,26 @@
-using System;
-using System.Threading.Tasks;
 using Common.Interfaces;
-using ContentLoader.Entities;
+using ContentLoader.Data;
+using ContentLoader.Factories;
 using Cysharp.Threading.Tasks;
-using UniRx;
-using UnityEngine.AddressableAssets;
-using UnityEngine.AddressableAssets.ResourceLocators;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace ContentLoader.Services
 {
     public class CatalogLoaderService : IService
     {
-        public UniTask<bool> LoadCatalog(string catalogPath, out ProgressLoadStream progressLoadStream)
+        private readonly CatalogLoadTaskFactory _catalogLoadTaskFactory;
+
+        public CatalogLoaderService(CatalogLoadTaskFactory catalogLoadTaskFactory)
         {
-            progressLoadStream = new ProgressLoadStream();
-            
-            return LoadCatalogInternal(catalogPath).ToUniTask(true);
+            _catalogLoadTaskFactory = catalogLoadTaskFactory;
         }
 
-        private IObservable<bool> LoadCatalogInternal(string catalogPath)
+        public async UniTask<bool> LoadCatalog(string catalogPath)
         {
-            var subject = new Subject<bool>();
-            
-            var loadCatalog = 
-                Addressables.LoadContentCatalogAsync(catalogPath, true);
+            var catalogLoad = _catalogLoadTaskFactory.Create();
 
-            loadCatalog.ToObservable()
-                .Subscribe(_ =>
-                {
-                    subject.OnNext(loadCatalog.Status == AsyncOperationStatus.Succeeded);
-                    subject.OnCompleted();
-                });
+            await catalogLoad.Execute(catalogPath);
 
-            return subject;
+            return catalogLoad.Status.Equals(LoadStatus.Success);
         }
     }
 }

@@ -1,27 +1,21 @@
-using System.Collections;
 using Common.Interfaces;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.SceneManagement;
+using ContentLoader.Services;
+using Cysharp.Threading.Tasks;
 
 namespace ContentLoader
 {
     public class ContentLoader : IFacade
     {
-        private IEnumerator LoadContent()
+        private CatalogLoaderService _catalogLoaderService;
+
+        public ContentLoader(CatalogLoaderService catalogLoaderService)
         {
-            var loadContent = Addressables.LoadContentCatalogAsync(
-                "C:/UnityProjects/Core-Addressables/Windows/catalog.json", true);
-            
-            yield return loadContent;
+            _catalogLoaderService = catalogLoaderService;
+        }
 
-            if (loadContent.Status != AsyncOperationStatus.Succeeded)
-            {
-                yield break;
-            }
-
-            Addressables.LoadSceneAsync("SampleScene.unity");
-            Addressables.LoadSceneAsync("SampleAdditiveScene.unity", LoadSceneMode.Additive);
+        public UniTask<bool> LoadCatalog(string catalogPath)
+        {
+            return _catalogLoaderService.LoadCatalog(catalogPath);
         }
     }
 }
