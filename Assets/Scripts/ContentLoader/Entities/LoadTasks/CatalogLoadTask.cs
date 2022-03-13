@@ -6,6 +6,10 @@ namespace ContentLoader.Entities.LoadTasks
 {
     public class CatalogLoadTask : BaseLoadTask
     {
+        public CatalogLoadTask(string key) : base(key)
+        {
+        }
+        
         protected override async UniTask Loading(string key)
         {
             var loadCatalog = 

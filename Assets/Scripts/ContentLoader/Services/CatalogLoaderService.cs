@@ -16,9 +16,9 @@ namespace ContentLoader.Services
 
         public async UniTask<bool> LoadCatalog(string catalogPath)
         {
-            var catalogLoad = _catalogLoadTaskFactory.Create();
+            var catalogLoad = _catalogLoadTaskFactory.Create(catalogPath);
 
-            await catalogLoad.Execute(catalogPath);
+            await catalogLoad.Execute();
 
             return catalogLoad.Status.Equals(LoadStatus.Success);
         }

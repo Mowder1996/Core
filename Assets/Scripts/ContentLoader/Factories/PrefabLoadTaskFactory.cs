@@ -3,7 +3,7 @@ using Zenject;
 
 namespace ContentLoader.Factories
 {
-    public class CatalogLoadTaskFactory : PlaceholderFactory<string, CatalogLoadTask>
+    public class PrefabLoadTaskFactory : PlaceholderFactory<string, PrefabLoadTask>
     {
         
     }

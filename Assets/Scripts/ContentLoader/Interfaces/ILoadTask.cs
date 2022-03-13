@@ -8,7 +8,7 @@ namespace ContentLoader.Interfaces
     {
         IObservable<float> ProgressStream { get; }
         LoadStatus Status { get; }
-        UniTask Execute(string key);
+        UniTask Execute();
         void Cancel();
     }
 }

@@ -1,23 +1,29 @@
 using System;
 using System.Threading;
+using Common.Interfaces;
 using ContentLoader.Data;
 using ContentLoader.Interfaces;
 using Cysharp.Threading.Tasks;
 
 namespace ContentLoader.Entities.LoadTasks
 {
-    public abstract class BaseLoadTask : ILoadTask
+    public abstract class BaseLoadTask : ILoadTask, IIdentified
     {
+        private readonly string _key;
+
+        public string Id => _key;
         public IObservable<float> ProgressStream => ProgressLoadStream;
         public LoadStatus Status { get; private set; } = LoadStatus.None;
 
         protected ProgressLoadStream ProgressLoadStream;
         protected CancellationTokenSource CancellationTokenSource;
-
+        
         private bool _isInitialized;
 
-        protected BaseLoadTask()
+        protected BaseLoadTask(string key)
         {
+            _key = key;
+            
             Initialize();
         }
         
@@ -26,7 +32,7 @@ namespace ContentLoader.Entities.LoadTasks
             Dispose();
         }
 
-        public virtual async UniTask Execute(string key)
+        public async UniTask Execute()
         {
             if (!_isInitialized)
             {
@@ -35,7 +41,7 @@ namespace ContentLoader.Entities.LoadTasks
 
             SetStatus(LoadStatus.Process);
             
-            await Loading(key);
+            await Loading(_key);
             
             Dispose();
         }
