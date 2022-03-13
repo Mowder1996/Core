@@ -1,24 +1,20 @@
 using System.Collections;
+using Common.IntegrationTests;
 using ContentLoader.Bootstrap;
 using ContentLoader.Services;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using Zenject;
 
 namespace ContentLoader.IntegrationTests
 {
-    public class ContentLoaderIntegrationTests : ZenjectIntegrationTestFixture
+    public class ContentLoaderIntegrationTests : BaseIntegrationTestFixture
     {
         private CatalogLoaderService _catalogLoaderService;
         
-        [SetUp]
-        public void Init()
+        public override void InstallAndResolveBindings()
         {
-            SkipInstall();
-            
             Container.Install<ContentLoaderInstaller>();
 
             _catalogLoaderService = Container.Resolve<CatalogLoaderService>();
