@@ -44,18 +44,23 @@ namespace ContentLoader.IntegrationTests
             var task = _prefabSpawnerService.SpawnPrefab("Cube").AsTask();
             yield return task;
 
-            Debug.Log($"GO name: {task.Result.Instance.name}");
+            Assert.IsNotNull(task.Result.Instance);
 
             var task2 = _prefabSpawnerService.SpawnPrefab<MeshFilter>("Cube").AsTask();
-            
             yield return task2;
             
-            Debug.Log($"Vertices count: {task2.Result.Instance.mesh.vertices.Length}");
+            Assert.IsNotNull(task2.Result.Instance);
+            Assert.IsInstanceOf<MeshFilter>(task2.Result);
             
             yield return new WaitForSeconds(3);
             
             task.Result.Unload();
             task2.Result.Unload();
+            
+            yield return new WaitForSeconds(1);
+            
+            Assert.IsNull(task.Result);
+            Assert.IsNull(task2.Result);
             
             yield return new WaitForSeconds(3);
         }

@@ -5,12 +5,7 @@ namespace Common.Entities
 {
     public class BaseKeyValueStorage<TKey, TValue> : IKeyValueStorage<TKey, TValue>
     {
-        private readonly Dictionary<TKey, TValue> _items;
-
-        public BaseKeyValueStorage(Dictionary<TKey, TValue> items)
-        {
-            _items = items;
-        }
+        private readonly Dictionary<TKey, TValue> _items = new Dictionary<TKey, TValue>();
 
         public virtual void Add(TKey key, TValue value)
         {
