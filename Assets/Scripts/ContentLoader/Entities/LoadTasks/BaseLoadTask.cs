@@ -27,6 +27,24 @@ namespace ContentLoader.Entities.LoadTasks
             Initialize();
         }
         
+        private void Initialize()
+        {
+            ProgressLoadStream = new ProgressLoadStream();
+            CancellationTokenSource = new CancellationTokenSource();
+
+            _isInitialized = true;
+        }
+        
+        private void Dispose()
+        {
+            _isInitialized = false;
+            
+            ProgressLoadStream?.Dispose();
+            
+            CancellationTokenSource.Cancel();
+            CancellationTokenSource?.Dispose();
+        }
+        
         ~BaseLoadTask()
         {
             Dispose();
@@ -61,24 +79,6 @@ namespace ContentLoader.Entities.LoadTasks
         protected void SetStatus(LoadStatus status)
         {
             Status = status;
-        }
-
-        private void Initialize()
-        {
-            ProgressLoadStream = new ProgressLoadStream();
-            CancellationTokenSource = new CancellationTokenSource();
-
-            _isInitialized = true;
-        }
-        
-        private void Dispose()
-        {
-            _isInitialized = false;
-            
-            ProgressLoadStream?.Dispose();
-            
-            CancellationTokenSource.Cancel();
-            CancellationTokenSource?.Dispose();
         }
     }
 }

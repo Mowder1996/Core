@@ -20,11 +20,6 @@ namespace ContentLoader.Entities.AssetHandlers
             PrefabInjectionFactory = prefabInjectionFactory;
         }
 
-        protected BasePrefabHandler(PrefabLoadTask loadTask)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public virtual async UniTask Load()
         {
             if (IsLoaded)
