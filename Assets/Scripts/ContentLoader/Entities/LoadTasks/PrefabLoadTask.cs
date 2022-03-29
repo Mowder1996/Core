@@ -13,19 +13,14 @@ namespace ContentLoader.Entities.LoadTasks
         {
         }
         
-        protected override async UniTask Loading(string key)
+        protected override async UniTask<UniTaskStatus> Loading(string key)
         {
             var handle = Addressables.InstantiateAsync(key)
                 .ToUniTask(ProgressLoadStream, PlayerLoopTiming.Update, CancellationTokenSource.Token);
 
             Result = await handle;
             
-            var status = handle.Status;
-
-            if (!status.Equals(UniTaskStatus.Canceled))
-            {
-                SetStatus(status.Equals(UniTaskStatus.Succeeded) ? LoadStatus.Success : LoadStatus.Failed);   
-            }
+            return handle.Status;
         }
     }
 }

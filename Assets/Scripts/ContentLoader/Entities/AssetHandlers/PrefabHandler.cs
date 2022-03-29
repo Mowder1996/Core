@@ -6,9 +6,10 @@ using UnityEngine.AddressableAssets;
 
 namespace ContentLoader.Entities.AssetHandlers
 {
-    public class PrefabHandler : BasePrefabHandler<GameObject>
+    public class PrefabHandler : BasePrefabHandler<GameObject, PrefabLoadTask>
     {
-        public PrefabHandler(PrefabLoadTask loadTask, PrefabInjectionFactory prefabInjectionFactory) : base(loadTask, prefabInjectionFactory)
+        public PrefabHandler(PrefabLoadTask loadTask, PrefabInjectionFactory prefabInjectionFactory) 
+            : base(loadTask, prefabInjectionFactory)
         {
         }
 
@@ -16,7 +17,7 @@ namespace ContentLoader.Entities.AssetHandlers
         {
             await base.Load();
 
-            if (LoadTask.Result == null)
+            if (!IsLoaded)
             {
                 return;
             }
@@ -34,9 +35,10 @@ namespace ContentLoader.Entities.AssetHandlers
         }
     }
 
-    public class PrefabHandler<TComponent> : BasePrefabHandler<TComponent> where TComponent : Component
+    public class PrefabHandler<TComponent> : BasePrefabHandler<TComponent, PrefabLoadTask> where TComponent : Component
     {
-        public PrefabHandler(PrefabLoadTask loadTask, PrefabInjectionFactory prefabInjectionFactory) : base(loadTask, prefabInjectionFactory)
+        public PrefabHandler(PrefabLoadTask loadTask, PrefabInjectionFactory prefabInjectionFactory) 
+            : base(loadTask, prefabInjectionFactory)
         {
         }
         
@@ -44,7 +46,7 @@ namespace ContentLoader.Entities.AssetHandlers
         {
             await base.Load();
 
-            if (LoadTask.Result == null)
+            if (!IsLoaded)
             {
                 return;
             }

@@ -1,4 +1,3 @@
-using ContentLoader.Data;
 using Cysharp.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 
@@ -10,7 +9,7 @@ namespace ContentLoader.Entities.LoadTasks
         {
         }
         
-        protected override async UniTask Loading(string key)
+        protected override async UniTask<UniTaskStatus> Loading(string key)
         {
             var loadCatalog = 
                 Addressables.LoadContentCatalogAsync(key, true)
@@ -20,12 +19,7 @@ namespace ContentLoader.Entities.LoadTasks
 
             await loadCatalog;
 
-            var status = loadCatalog.Status;
-
-            if (!status.Equals(UniTaskStatus.Canceled))
-            {
-                SetStatus(status.Equals(UniTaskStatus.Succeeded) ? LoadStatus.Success : LoadStatus.Failed);   
-            }
+            return loadCatalog.Status;
         }
     }
 }

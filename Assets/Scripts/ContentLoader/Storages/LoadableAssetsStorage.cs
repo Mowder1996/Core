@@ -3,7 +3,7 @@ using ContentLoader.Interfaces;
 
 namespace ContentLoader.Storages
 {
-    public class LoadTaskStorage : BaseKeyValueListStorage<string, ILoadTask>
+    public class LoadableAssetsStorage : BaseKeyValueListStorage<string, ILoadable>
     {
         
     }

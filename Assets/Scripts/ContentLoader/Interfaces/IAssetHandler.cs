@@ -7,7 +7,5 @@ namespace ContentLoader.Interfaces
     {
         bool IsLoaded { get; }
         T Instance { get; }
-        UniTask Load();
-        void Unload();
     }
 }

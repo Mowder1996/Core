@@ -12,17 +12,20 @@ namespace ContentLoader.Services
         private readonly PrefabLoadTaskFactory _prefabLoadTaskFactory;
         private readonly PrefabHandlerFactory _prefabHandlerFactory;
         private readonly LoadTaskStorage _loadTaskStorage;
+        private readonly LoadableAssetsStorage _assetsStorage;
         
         public PrefabSpawnerService(PrefabLoadTaskFactory prefabLoadTaskFactory, 
                                     PrefabHandlerFactory prefabHandlerFactory, 
-                                    LoadTaskStorage loadTaskStorage)
+                                    LoadTaskStorage loadTaskStorage, 
+                                    LoadableAssetsStorage assetsStorage)
         {
             _prefabLoadTaskFactory = prefabLoadTaskFactory;
             _prefabHandlerFactory = prefabHandlerFactory;
             _loadTaskStorage = loadTaskStorage;
+            _assetsStorage = assetsStorage;
         }
 
-        public async UniTask<PrefabHandler> SpawnPrefab(string key)
+        public async UniTask<GameObject> CreatePrefab(string key)
         {
             var loadTask = _prefabLoadTaskFactory.Create(key);
             var handler = _prefabHandlerFactory.Create(loadTask);
@@ -30,11 +33,16 @@ namespace ContentLoader.Services
             _loadTaskStorage.Add(key, loadTask);
             
             await handler.Load();
+
+            if (handler.IsLoaded)
+            {
+                _assetsStorage.Add(key, handler);
+            }
             
-            return handler;
+            return handler.Instance;
         }
         
-        public async UniTask<PrefabHandler<TComponent>> SpawnPrefab<TComponent>(string key)
+        public async UniTask<TComponent> CreatePrefab<TComponent>(string key)
             where TComponent : Component
         {
             var loadTask = _prefabLoadTaskFactory.Create(key);
@@ -43,8 +51,27 @@ namespace ContentLoader.Services
             _loadTaskStorage.Add(key, loadTask);
             
             await handler.Load();
+
+            if (handler.IsLoaded)
+            {
+                var componentHandler = handler as PrefabHandler<Component>;
+                
+                _assetsStorage.Add(key, componentHandler);
+            }
             
-            return handler;
+            return handler.Instance;
+        }
+
+        public void DestroyPrefabs(string key)
+        {
+            var prefabHandlersCount = _assetsStorage.Count(key);
+
+            for (var i = 0; i < prefabHandlersCount; i++)
+            {
+                _assetsStorage.Get(key, i).Unload();
+            }
+            
+            _assetsStorage.Clear(key);
         }
     }
 }

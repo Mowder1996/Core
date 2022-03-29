@@ -59,7 +59,12 @@ namespace ContentLoader.Entities.LoadTasks
 
             SetStatus(LoadStatus.Process);
             
-            await Loading(_key);
+            var status = await Loading(_key);
+
+            if (!status.Equals(UniTaskStatus.Canceled))
+            {
+                SetStatus(status.Equals(UniTaskStatus.Succeeded) ? LoadStatus.Success : LoadStatus.Failed);   
+            }
             
             Dispose();
         }
@@ -74,9 +79,9 @@ namespace ContentLoader.Entities.LoadTasks
             Dispose();
         }
 
-        protected abstract UniTask Loading(string key);
+        protected abstract UniTask<UniTaskStatus> Loading(string key);
 
-        protected void SetStatus(LoadStatus status)
+        private void SetStatus(LoadStatus status)
         {
             Status = status;
         }

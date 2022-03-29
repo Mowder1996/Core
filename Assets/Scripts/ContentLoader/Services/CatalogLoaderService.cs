@@ -34,7 +34,7 @@ namespace ContentLoader.Services
             return catalogLoad.Status.Equals(LoadStatus.Success);
         }
 
-        public async UniTask<IEnumerable<string>> GetOutDatedCatalogs(string catalogPath)
+        public async UniTask<IEnumerable<string>> GetOutDatedCatalogs()
         {
             return await Addressables.CheckForCatalogUpdates();
         }

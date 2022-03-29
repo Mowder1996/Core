@@ -1,42 +1,18 @@
-using ContentLoader.Data;
-using ContentLoader.Entities.LoadTasks;
 using ContentLoader.Factories;
 using ContentLoader.Interfaces;
-using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace ContentLoader.Entities.AssetHandlers
 {
-    public abstract class BasePrefabHandler<T> : IAssetHandler<T>
+    public abstract class BasePrefabHandler<T, TLoadTask> : BaseAssetHandler<T, TLoadTask>
+        where T : Object
+        where TLoadTask : ILoadTask
     {
-        protected readonly PrefabLoadTask LoadTask;
-        protected PrefabInjectionFactory PrefabInjectionFactory { get; private set; }
-
-        public bool IsLoaded { get; private set; }
-        public T Instance { get; protected set; }
+        protected readonly PrefabInjectionFactory PrefabInjectionFactory;
         
-        public BasePrefabHandler(PrefabLoadTask loadTask, PrefabInjectionFactory prefabInjectionFactory)
+        protected BasePrefabHandler(TLoadTask loadTask, PrefabInjectionFactory prefabInjectionFactory) : base(loadTask)
         {
-            LoadTask = loadTask;
             PrefabInjectionFactory = prefabInjectionFactory;
         }
-
-        public virtual async UniTask Load()
-        {
-            if (IsLoaded)
-            {
-                return;
-            }
-            
-            await LoadTask.Execute();
-
-            if (LoadTask.Result == null)
-            {
-                return;
-            }
-            
-            IsLoaded = LoadTask.Status == LoadStatus.Success;
-        }
-
-        public abstract void Unload();
     }
 }

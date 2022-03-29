@@ -21,8 +21,7 @@ namespace Common.Extensions.Zenject
             container.BindInterfacesAndSelfTo<TStorage>().AsSingle();
         }
 
-        public static void InstallStorage<TKey, TValue, TStorage>(this DiContainer container) 
-            where TStorage : IKeyValueStorage<TKey, TValue>
+        public static void InstallStorage<TKey, TValue, TStorage>(this DiContainer container)
         {
             container.BindInterfacesAndSelfTo<TStorage>().AsSingle();
         }

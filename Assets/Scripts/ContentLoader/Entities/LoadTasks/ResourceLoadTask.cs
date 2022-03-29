@@ -1,26 +1,28 @@
-using ContentLoader.Data;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace ContentLoader.Entities.LoadTasks
 {
-    public class CatalogUpdateTask : BaseLoadTask
+    public class ResourceLoadTask : BaseLoadTask
     {
-        public CatalogUpdateTask(string key) : base(key)
+        public Object Result { get; private set; }
+        
+        public ResourceLoadTask(string key) : base(key)
         {
         }
 
         protected override async UniTask<UniTaskStatus> Loading(string key)
         {
-            var updateCatalog = 
-                Addressables.UpdateCatalogs(new []{key}, true)
+            var loadResource = 
+                Addressables.LoadAssetAsync<Object>(key)
                     .ToUniTask(ProgressLoadStream, 
                         PlayerLoopTiming.Update, 
                         CancellationTokenSource.Token);
 
-            await updateCatalog;
+            Result = await loadResource;
 
-            return updateCatalog.Status;
+            return loadResource.Status;
         }
     }
 }
