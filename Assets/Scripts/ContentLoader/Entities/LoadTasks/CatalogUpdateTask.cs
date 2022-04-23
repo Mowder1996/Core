@@ -1,4 +1,4 @@
-using ContentLoader.Data;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 
@@ -10,13 +10,15 @@ namespace ContentLoader.Entities.LoadTasks
         {
         }
 
-        protected override async UniTask<UniTaskStatus> Loading(string key)
+        protected override async UniTask<UniTaskStatus> Loading(string key, 
+                                                                ProgressLoadStream progressLoadStream, 
+                                                                CancellationToken cancellationToken)
         {
             var updateCatalog = 
                 Addressables.UpdateCatalogs(new []{key}, true)
-                    .ToUniTask(ProgressLoadStream, 
-                        PlayerLoopTiming.Update, 
-                        CancellationTokenSource.Token);
+                    .ToUniTask(progressLoadStream, 
+                                PlayerLoopTiming.Update, 
+                                cancellationToken);
 
             await updateCatalog;
 

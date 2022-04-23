@@ -10,16 +10,13 @@ namespace ContentLoader.Services
     {
         private readonly ResourceLoadTaskFactory _resourceLoadTaskFactory;
         private readonly ResourceHandlerFactory _resourceHandlerFactory;
-        private readonly LoadTaskStorage _loadTaskStorage;
         private readonly LoadableAssetsStorage _assetsStorage;
 
         public ResourceLoaderService(ResourceLoadTaskFactory resourceLoadTaskFactory, 
                                     ResourceHandlerFactory resourceHandlerFactory, 
-                                    LoadTaskStorage loadTaskStorage, 
                                     LoadableAssetsStorage assetsStorage)
         {
             _resourceLoadTaskFactory = resourceLoadTaskFactory;
-            _loadTaskStorage = loadTaskStorage;
             _assetsStorage = assetsStorage;
             _resourceHandlerFactory = resourceHandlerFactory;
         }
@@ -28,9 +25,7 @@ namespace ContentLoader.Services
         {
             var loadTask = _resourceLoadTaskFactory.Create(key);
             var handler = _resourceHandlerFactory.Create(loadTask);
-            
-            _loadTaskStorage.Add(key, loadTask);
-            
+
             await handler.Load();
 
             if (handler.IsLoaded)
@@ -49,7 +44,7 @@ namespace ContentLoader.Services
             {
                 _assetsStorage.Get(key, i).Unload();
             }
-            
+
             _assetsStorage.Clear(key);
         }
     }

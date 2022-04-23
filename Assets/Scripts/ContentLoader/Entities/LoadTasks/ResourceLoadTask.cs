@@ -1,3 +1,4 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -12,13 +13,15 @@ namespace ContentLoader.Entities.LoadTasks
         {
         }
 
-        protected override async UniTask<UniTaskStatus> Loading(string key)
+        protected override async UniTask<UniTaskStatus> Loading(string key, 
+                                                                ProgressLoadStream progressLoadStream, 
+                                                                CancellationToken cancellationToken)
         {
             var loadResource = 
                 Addressables.LoadAssetAsync<Object>(key)
-                    .ToUniTask(ProgressLoadStream, 
-                        PlayerLoopTiming.Update, 
-                        CancellationTokenSource.Token);
+                    .ToUniTask(progressLoadStream, 
+                                PlayerLoopTiming.Update, 
+                                cancellationToken);
 
             Result = await loadResource;
 

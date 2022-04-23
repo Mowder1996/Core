@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Common.Interfaces;
-using ContentLoader.Data;
 using ContentLoader.Services;
 using ContentLoader.Storages;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
 
 namespace ContentLoader
@@ -16,62 +15,53 @@ namespace ContentLoader
         private readonly CatalogLoaderService _catalogLoaderService;
         private readonly PrefabSpawnerService _prefabSpawnerService;
         private readonly ResourceLoaderService _resourceLoaderService;
-        private readonly LoadTaskStorage _loadTaskStorage;
+        private readonly LoadableAssetsStorage _assetsStorage;
 
         public ContentLoader(CatalogLoaderService catalogLoaderService, 
                             PrefabSpawnerService prefabSpawnerService, 
                             ResourceLoaderService resourceLoaderService, 
-                            LoadTaskStorage loadTaskStorage)
+                            LoadableAssetsStorage assetsStorage)
         {
             _catalogLoaderService = catalogLoaderService;
             _prefabSpawnerService = prefabSpawnerService;
             _resourceLoaderService = resourceLoaderService;
-            _loadTaskStorage = loadTaskStorage;
+            _assetsStorage = assetsStorage;
         }
 
-        public IEnumerable<IObservable<float>> GetLoadStreamsByKey(string key)
+        public async UniTask<IEnumerable<string>> GetKeysByLabels(IEnumerable<string> labels, Addressables.MergeMode mergeMode)
         {
-            var loadStreamsCount = _loadTaskStorage.Count(key);
-            
-            if (loadStreamsCount == 0)
-            {
-                return null;
-            }
+            var locations = await Addressables.LoadResourceLocationsAsync(labels, mergeMode);
 
-            var progressStreams = new List<IObservable<float>>();
+            return locations.Select(item => item.PrimaryKey);
+        }
+        
+        public async UniTask<IEnumerable<string>> GetKeysByLabels<T>(IEnumerable<string> labels, Addressables.MergeMode mergeMode)
+        {
+            var locations = await Addressables.LoadResourceLocationsAsync(labels, mergeMode, typeof(T));
 
-            for (var i = 0; i < loadStreamsCount; i++)
-            {
-                var loadTask = _loadTaskStorage.Get(key, i);
-                
-                if (!loadTask.Status.Equals(LoadStatus.Process))
-                {
-                    continue;
-                }
-                
-                progressStreams.Add(loadTask.ProgressStream);
-            }
-
-            return progressStreams.Any() ? progressStreams : null;
+            return locations.Select(item => item.PrimaryKey);
         }
 
         #region Catalogs
 
-        public UniTask<bool> LoadCatalog(string catalogPath)
+        public UniTask LoadCatalog(string catalogPath)
         {
             return _catalogLoaderService.LoadCatalog(catalogPath);
         }
 
-        public UniTask<bool> UpdateCatalog(string catalogPath)
+        public UniTask UpdateCatalog(string catalogPath)
         {
             return _catalogLoaderService.UpdateCatalog(catalogPath);
         }
 
-        public async UniTask<bool> UpdateCatalogs()
+        public UniTask UpdateCatalog(IEnumerable<string> catalogPaths)
         {
-            var outDatedCatalogs = await _catalogLoaderService.GetOutDatedCatalogs();
-
-            return await _catalogLoaderService.UpdateCatalogs(outDatedCatalogs);
+            return _catalogLoaderService.UpdateCatalogs(catalogPaths);
+        }
+        
+        public async UniTask<IEnumerable<string>> GetOutDatedCatalogs()
+        {
+            return await _catalogLoaderService.GetOutDatedCatalogs();
         }
 
         #endregion
@@ -99,6 +89,11 @@ namespace ContentLoader
 
         public UniTask<TResourceType> LoadResource<TResourceType>(string key) where TResourceType : Object
         {
+            if (_assetsStorage.Count(key) > 0)
+            {
+                var handler = _assetsStorage.Get(key, 0);
+            }
+            
             return _resourceLoaderService.LoadResource<TResourceType>(key);
         }
 

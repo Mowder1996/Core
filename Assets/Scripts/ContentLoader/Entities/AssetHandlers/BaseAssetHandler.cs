@@ -13,21 +13,21 @@ namespace ContentLoader.Entities.AssetHandlers
 
         public bool IsLoaded { get; private set; }
         public T Instance { get; protected set; }
-        
-        public BaseAssetHandler(TLoadTask loadTask)
+
+        protected BaseAssetHandler(TLoadTask loadTask)
         {
             LoadTask = loadTask;
+            
+            IsLoaded = LoadTask.Status.Equals(LoadStatus.Success);
         }
 
         public virtual async UniTask Load()
         {
-            if (IsLoaded)
+            if (!IsLoaded)
             {
-                return;
+                await LoadTask.Execute();
             }
             
-            await LoadTask.Execute();
-
             IsLoaded = LoadTask.Status.Equals(LoadStatus.Success);
         }
 

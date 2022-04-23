@@ -11,17 +11,14 @@ namespace ContentLoader.Services
     {
         private readonly PrefabLoadTaskFactory _prefabLoadTaskFactory;
         private readonly PrefabHandlerFactory _prefabHandlerFactory;
-        private readonly LoadTaskStorage _loadTaskStorage;
         private readonly LoadableAssetsStorage _assetsStorage;
         
         public PrefabSpawnerService(PrefabLoadTaskFactory prefabLoadTaskFactory, 
                                     PrefabHandlerFactory prefabHandlerFactory, 
-                                    LoadTaskStorage loadTaskStorage, 
                                     LoadableAssetsStorage assetsStorage)
         {
             _prefabLoadTaskFactory = prefabLoadTaskFactory;
             _prefabHandlerFactory = prefabHandlerFactory;
-            _loadTaskStorage = loadTaskStorage;
             _assetsStorage = assetsStorage;
         }
 
@@ -30,8 +27,6 @@ namespace ContentLoader.Services
             var loadTask = _prefabLoadTaskFactory.Create(key);
             var handler = _prefabHandlerFactory.Create(loadTask);
 
-            _loadTaskStorage.Add(key, loadTask);
-            
             await handler.Load();
 
             if (handler.IsLoaded)
@@ -48,8 +43,6 @@ namespace ContentLoader.Services
             var loadTask = _prefabLoadTaskFactory.Create(key);
             var handler = _prefabHandlerFactory.Create<TComponent>(loadTask);
 
-            _loadTaskStorage.Add(key, loadTask);
-            
             await handler.Load();
 
             if (handler.IsLoaded)

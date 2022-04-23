@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Common.Extensions.Zenject;
 using ContentLoader.Entities.AssetHandlers;
 using ContentLoader.Entities.LoadTasks;
@@ -25,6 +26,8 @@ namespace ContentLoader.Bootstrap
         {
             Container.BindFactory<string, CatalogLoadTask, CatalogLoadTaskFactory>().AsSingle();
             Container.BindFactory<string, CatalogUpdateTask, CatalogUpdateTaskFactory>().AsSingle();
+            Container.BindFactory<List<CatalogUpdateTask>, CatalogsUpdateTask, CatalogsUpdateTaskFactory>().AsSingle();
+            
             Container.BindFactory<string, PrefabLoadTask, PrefabLoadTaskFactory>().AsSingle();
             Container.BindFactory<string, ResourceLoadTask, ResourceLoadTaskFactory>().AsSingle();
             
@@ -43,7 +46,6 @@ namespace ContentLoader.Bootstrap
         
         private void InstallStorages()
         {
-            Container.InstallStorage<string, ILoadTask, LoadTaskStorage>();
             Container.InstallStorage<string, ILoadable, LoadableAssetsStorage>();
         }
     }

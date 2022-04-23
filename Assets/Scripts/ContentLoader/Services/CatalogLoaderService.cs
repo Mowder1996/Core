@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using Common.Interfaces;
-using ContentLoader.Data;
+using ContentLoader.Entities.LoadTasks;
 using ContentLoader.Factories;
-using ContentLoader.Storages;
 using Cysharp.Threading.Tasks;
 using UnityEngine.AddressableAssets;
 
@@ -12,26 +11,22 @@ namespace ContentLoader.Services
     {
         private readonly CatalogLoadTaskFactory _catalogLoadTaskFactory;
         private readonly CatalogUpdateTaskFactory _catalogUpdateTaskFactory;
-        private readonly LoadTaskStorage _loadTaskStorage;
+        private readonly CatalogsUpdateTaskFactory _catalogsUpdateTaskFactory;
 
         public CatalogLoaderService(CatalogLoadTaskFactory catalogLoadTaskFactory, 
                                     CatalogUpdateTaskFactory catalogUpdateTaskFactory, 
-                                    LoadTaskStorage loadTaskStorage)
+                                    CatalogsUpdateTaskFactory catalogsUpdateTaskFactory)
         {
             _catalogLoadTaskFactory = catalogLoadTaskFactory;
             _catalogUpdateTaskFactory = catalogUpdateTaskFactory;
-            _loadTaskStorage = loadTaskStorage;
+            _catalogsUpdateTaskFactory = catalogsUpdateTaskFactory;
         }
 
-        public async UniTask<bool> LoadCatalog(string catalogPath)
+        public UniTask LoadCatalog(string catalogPath)
         {
             var catalogLoad = _catalogLoadTaskFactory.Create(catalogPath);
 
-            _loadTaskStorage.Add(catalogPath, catalogLoad);
-            
-            await catalogLoad.Execute();
-
-            return catalogLoad.Status.Equals(LoadStatus.Success);
+            return catalogLoad.Execute();
         }
 
         public async UniTask<IEnumerable<string>> GetOutDatedCatalogs()
@@ -39,33 +34,30 @@ namespace ContentLoader.Services
             return await Addressables.CheckForCatalogUpdates();
         }
 
-        public async UniTask<bool> UpdateCatalog(string catalogPath)
+        public UniTask UpdateCatalog(string catalogPath)
         {
-            return await UpdateCatalogsInternal(new[] {catalogPath});
+            return UpdateCatalogsInternal(new[] {catalogPath});
         }
 
-        public async UniTask<bool> UpdateCatalogs(IEnumerable<string> catalogPaths)
+        public UniTask UpdateCatalogs(IEnumerable<string> catalogPaths)
         {
-            return await UpdateCatalogsInternal(catalogPaths);
+            return UpdateCatalogsInternal(catalogPaths);
         }
 
-        private async UniTask<bool> UpdateCatalogsInternal(IEnumerable<string> catalogPaths)
+        private UniTask UpdateCatalogsInternal(IEnumerable<string> catalogPaths)
         {
+            var updateTasks = new List<CatalogUpdateTask>();
+            
             foreach (var catalogPath in catalogPaths)
             {
                 var task = _catalogUpdateTaskFactory.Create(catalogPath);
 
-                _loadTaskStorage.Add(catalogPath, task);
-                
-                await task.Execute();
-
-                if (!task.Status.Equals(LoadStatus.Success))
-                {
-                    return false;
-                }
+                updateTasks.Add(task);
             }
 
-            return true;
+            var catalogsUpdateTask = _catalogsUpdateTaskFactory.Create(updateTasks);
+
+            return catalogsUpdateTask.Execute();
         }
     }
 }

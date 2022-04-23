@@ -4,45 +4,38 @@ using Common.Interfaces;
 using ContentLoader.Data;
 using ContentLoader.Interfaces;
 using Cysharp.Threading.Tasks;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace ContentLoader.Entities.LoadTasks
 {
     public abstract class BaseLoadTask : ILoadTask, IIdentified
     {
-        private readonly string _key;
-
-        public string Id => _key;
-        public IObservable<float> ProgressStream => ProgressLoadStream;
+        public string Id { get; }
+        public IObservable<float> ProgressStream => _progressLoadStream;
         public LoadStatus Status { get; private set; } = LoadStatus.None;
+        public long DownloadSize { get; private set; }
 
-        protected ProgressLoadStream ProgressLoadStream;
-        protected CancellationTokenSource CancellationTokenSource;
-        
-        private bool _isInitialized;
+        private ProgressLoadStream _progressLoadStream;
+        private CancellationTokenSource _cancellationTokenSource;
 
         protected BaseLoadTask(string key)
         {
-            _key = key;
-            
-            Initialize();
+            Id = key;
         }
         
         private void Initialize()
         {
-            ProgressLoadStream = new ProgressLoadStream();
-            CancellationTokenSource = new CancellationTokenSource();
-
-            _isInitialized = true;
+            _progressLoadStream = new ProgressLoadStream();
+            _cancellationTokenSource = new CancellationTokenSource();
         }
         
         private void Dispose()
         {
-            _isInitialized = false;
+            _progressLoadStream?.Dispose();
             
-            ProgressLoadStream?.Dispose();
-            
-            CancellationTokenSource.Cancel();
-            CancellationTokenSource?.Dispose();
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource?.Dispose();
         }
         
         ~BaseLoadTask()
@@ -52,14 +45,13 @@ namespace ContentLoader.Entities.LoadTasks
 
         public async UniTask Execute()
         {
-            if (!_isInitialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             SetStatus(LoadStatus.Process);
+
+            await GetDownloadSize(Id);
             
-            var status = await Loading(_key);
+            var status = await Loading(Id, _progressLoadStream, _cancellationTokenSource.Token);
 
             if (!status.Equals(UniTaskStatus.Canceled))
             {
@@ -71,7 +63,7 @@ namespace ContentLoader.Entities.LoadTasks
 
         public void Cancel()
         {
-            if (Status == LoadStatus.Process)
+            if (Status.Equals(LoadStatus.Process))
             {
                 SetStatus(LoadStatus.Cancelled);
             }
@@ -79,8 +71,19 @@ namespace ContentLoader.Entities.LoadTasks
             Dispose();
         }
 
-        protected abstract UniTask<UniTaskStatus> Loading(string key);
+        protected abstract UniTask<UniTaskStatus> Loading(string key, 
+                                                        ProgressLoadStream progressLoadStream, 
+                                                        CancellationToken cancellationToken);
 
+        private async UniTask GetDownloadSize(string key)
+        {
+            var sizeHandle = Addressables.GetDownloadSizeAsync(key);
+
+            await sizeHandle;
+
+            DownloadSize = sizeHandle.Status == AsyncOperationStatus.Succeeded ? sizeHandle.Result : 0;
+        }
+        
         private void SetStatus(LoadStatus status)
         {
             Status = status;

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Common.IntegrationTests;
 using ContentLoader.Bootstrap;
 using ContentLoader.Services;
@@ -36,6 +37,27 @@ namespace ContentLoader.IntegrationTests
             Assert.AreEqual(SceneManager.sceneCount, 2);
             
             yield return new WaitForSeconds(3);
+        }
+
+        [UnityTest]
+        public IEnumerator SpawnTest()
+        {
+            var go1 = Addressables.InstantiateAsync("chairBeige", trackHandle: false);
+            
+            yield return go1;
+            
+            var go2 = Addressables.InstantiateAsync("chairBeige", trackHandle: false);
+            
+            yield return go2;
+            
+            yield return new WaitForSeconds(3);
+            
+            Addressables.ReleaseInstance(go1);
+            Addressables.ReleaseInstance(go2);
+            
+            Resources.UnloadUnusedAssets();
+            
+            yield return new WaitForSeconds(10);
         }
     }
 }
