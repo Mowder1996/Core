@@ -11,12 +11,12 @@ namespace ContentLoader.Entities.LoadTasks
 {
     public class CatalogsUpdateTask : ILoadTask
     {
+        private readonly List<CatalogUpdateTask> _updateTasks;
+        
         public IObservable<float> ProgressStream { get; }
         public LoadStatus Status => GetStatus();
         public long DownloadSize { get; }
-
-        private List<CatalogUpdateTask> _updateTasks;
-
+        
         private CancellationTokenSource _cancellationTokenSource;
 
         public CatalogsUpdateTask(List<CatalogUpdateTask> updateTasks)

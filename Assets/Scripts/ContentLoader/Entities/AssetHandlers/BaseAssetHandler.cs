@@ -7,7 +7,7 @@ namespace ContentLoader.Entities.AssetHandlers
 {
     public abstract class BaseAssetHandler<T, TLoadTask> : IAssetHandler<T>, ILoadable 
         where T : Object
-        where TLoadTask : ILoadTask
+        where TLoadTask : ILoadTask, IResultHolder<T>
     {
         protected readonly TLoadTask LoadTask;
 
@@ -29,6 +29,7 @@ namespace ContentLoader.Entities.AssetHandlers
             }
             
             IsLoaded = LoadTask.Status.Equals(LoadStatus.Success);
+            Instance = LoadTask.Result;
         }
 
         public abstract void Unload();

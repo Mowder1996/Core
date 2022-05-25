@@ -1,11 +1,12 @@
 using System.Threading;
+using ContentLoader.Interfaces;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace ContentLoader.Entities.LoadTasks
 {
-    public class ResourceLoadTask : BaseLoadTask
+    public class ResourceLoadTask : BaseLoadTask, IResultHolder<Object>
     {
         public Object Result { get; private set; }
         

@@ -78,11 +78,6 @@ namespace ContentLoader
             return _prefabSpawnerService.CreatePrefab<TComponent>(key);
         }
 
-        public void DestroyAllPrefabsByKey(string key)
-        {
-            _prefabSpawnerService.DestroyPrefabs(key);
-        }
-
         #endregion
 
         #region Resources

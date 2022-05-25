@@ -1,11 +1,12 @@
 using System.Threading;
+using ContentLoader.Interfaces;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace ContentLoader.Entities.LoadTasks
 {
-    public class PrefabLoadTask : BaseLoadTask
+    public class PrefabLoadTask : BaseLoadTask, IResultHolder<GameObject>
     {
         public GameObject Result { get; private set; }
         
