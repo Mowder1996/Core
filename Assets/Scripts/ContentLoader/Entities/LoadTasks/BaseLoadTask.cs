@@ -49,13 +49,13 @@ namespace ContentLoader.Entities.LoadTasks
 
             SetStatus(LoadStatus.Process);
 
-            await GetDownloadSize(Id);
+            await UpdateDownloadSize(Id);
             
-            var status = await Loading(Id, _progressLoadStream, _cancellationTokenSource.Token);
+            var status = await Load(Id, _progressLoadStream, _cancellationTokenSource.Token);
 
             if (!status.Equals(UniTaskStatus.Canceled))
             {
-                SetStatus(status.Equals(UniTaskStatus.Succeeded) ? LoadStatus.Success : LoadStatus.Failed);   
+                SetStatus(status.Equals(UniTaskStatus.Succeeded) ? LoadStatus.Success : LoadStatus.Failed);
             }
             
             Dispose();
@@ -71,17 +71,17 @@ namespace ContentLoader.Entities.LoadTasks
             Dispose();
         }
 
-        protected abstract UniTask<UniTaskStatus> Loading(string key, 
+        protected abstract UniTask<UniTaskStatus> Load(string key, 
                                                         ProgressLoadStream progressLoadStream, 
                                                         CancellationToken cancellationToken);
 
-        private async UniTask GetDownloadSize(string key)
+        private async UniTask UpdateDownloadSize(string key)
         {
             var sizeHandle = Addressables.GetDownloadSizeAsync(key);
 
             await sizeHandle;
 
-            DownloadSize = sizeHandle.Status == AsyncOperationStatus.Succeeded ? sizeHandle.Result : 0;
+            DownloadSize = sizeHandle.Status.Equals(AsyncOperationStatus.Succeeded) ? sizeHandle.Result : 0;
         }
         
         private void SetStatus(LoadStatus status)

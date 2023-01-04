@@ -10,7 +10,7 @@ namespace ContentLoader.Entities.LoadTasks
         {
         }
         
-        protected override async UniTask<UniTaskStatus> Loading(string key, 
+        protected override async UniTask<UniTaskStatus> Load(string key, 
                                                                 ProgressLoadStream progressLoadStream, 
                                                                 CancellationToken cancellationToken)
         {

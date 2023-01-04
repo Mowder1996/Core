@@ -78,6 +78,11 @@ namespace ContentLoader
             return _prefabSpawnerService.CreatePrefab<TComponent>(key);
         }
 
+        public void UnloadPrefab(string key)
+        {
+            _prefabSpawnerService.UnloadPrefab(key);
+        }
+        
         #endregion
 
         #region Resources
