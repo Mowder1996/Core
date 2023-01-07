@@ -15,7 +15,13 @@ namespace Common.Extensions.Zenject
             container.BindInterfacesAndSelfTo<TModel>().AsSingle();
         }
         
-        public static void InstallStorage<TProduct, TStorage>(this DiContainer container) where TStorage : IStorage<TProduct>
+        public static void InstallStorage<TProduct, TStorage>(this DiContainer container) 
+            where TStorage : IStorage<TProduct>
+        {
+            container.BindInterfacesAndSelfTo<TStorage>().AsSingle();
+        }
+
+        public static void InstallStorage<TKey, TValue, TStorage>(this DiContainer container)
         {
             container.BindInterfacesAndSelfTo<TStorage>().AsSingle();
         }
@@ -24,7 +30,5 @@ namespace Common.Extensions.Zenject
         {
             container.BindInterfacesAndSelfTo<TService>().AsSingle();
         }
-        
-        
     }
 }
