@@ -1,33 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
-using Common.Interfaces;
-using ContentLoader.Services;
-using ContentLoader.Storages;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using Object = UnityEngine.Object;
 
 namespace ContentLoader
 {
-    public class ContentLoader : IFacade
+    public class ContentLoader
     {
-        private readonly CatalogLoaderService _catalogLoaderService;
-        private readonly PrefabSpawnerService _prefabSpawnerService;
-        private readonly ResourceLoaderService _resourceLoaderService;
-        private readonly LoadableAssetsStorage _assetsStorage;
+        private readonly AssetServiceResolver _assetServiceResolver;
 
-        public ContentLoader(CatalogLoaderService catalogLoaderService, 
-                            PrefabSpawnerService prefabSpawnerService, 
-                            ResourceLoaderService resourceLoaderService, 
-                            LoadableAssetsStorage assetsStorage)
+        public ContentLoader(AssetServiceResolver assetServiceResolver)
         {
-            _catalogLoaderService = catalogLoaderService;
-            _prefabSpawnerService = prefabSpawnerService;
-            _resourceLoaderService = resourceLoaderService;
-            _assetsStorage = assetsStorage;
+            _assetServiceResolver = assetServiceResolver;
         }
-
+        
         public async UniTask<IEnumerable<string>> GetKeysByLabels(IEnumerable<string> labels, Addressables.MergeMode mergeMode)
         {
             var locations = await Addressables.LoadResourceLocationsAsync(labels, mergeMode);
@@ -42,66 +29,36 @@ namespace ContentLoader
             return locations.Select(item => item.PrimaryKey);
         }
 
-        #region Catalogs
-
-        public UniTask LoadCatalog(string catalogPath)
+        /// <summary>
+        /// Grab new asset from loaded catalogs
+        /// </summary>
+        /// <param name="key"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>Tuple type (Id : string, Asset : T)</returns>
+        public async UniTask<(string, T)> CreateAsset<T>(string key) where T : Object
         {
-            return _catalogLoaderService.LoadCatalog(catalogPath);
+            var service = GetAssetService<T>();
+
+            return await service.CreateAsset(key);
         }
 
-        public UniTask UpdateCatalog(string catalogPath)
+        public async UniTask<T> GetAsset<T>(string key, string id) where T : Object
         {
-            return _catalogLoaderService.UpdateCatalog(catalogPath);
+            var service = GetAssetService<T>();
+
+            return await service.GetAsset(key, id);
         }
 
-        public UniTask UpdateCatalog(IEnumerable<string> catalogPaths)
+        public void ReleaseAsset<T>(string key, string id) where T : Object
         {
-            return _catalogLoaderService.UpdateCatalogs(catalogPaths);
-        }
-        
-        public async UniTask<IEnumerable<string>> GetOutDatedCatalogs()
-        {
-            return await _catalogLoaderService.GetOutDatedCatalogs();
-        }
-
-        #endregion
-
-        #region Prefabs
-
-        public UniTask<GameObject> CreatePrefab(string key)
-        {
-            return _prefabSpawnerService.CreatePrefab(key);
-        }
-
-        public UniTask<TComponent> CreatePrefab<TComponent>(string key) where TComponent : Component
-        {
-            return _prefabSpawnerService.CreatePrefab<TComponent>(key);
-        }
-
-        public void UnloadPrefab(string key)
-        {
-            _prefabSpawnerService.UnloadPrefab(key);
-        }
-        
-        #endregion
-
-        #region Resources
-
-        public UniTask<TResourceType> LoadResource<TResourceType>(string key) where TResourceType : Object
-        {
-            if (_assetsStorage.Count(key) > 0)
-            {
-                var handler = _assetsStorage.Get(key, 0);
-            }
+            var service = GetAssetService<T>();
             
-            return _resourceLoaderService.LoadResource<TResourceType>(key);
+            service.ReleaseAsset(key, id);
         }
 
-        public void UnloadAllResourcesByKey(string key)
+        private AssetService<T> GetAssetService<T>() where T : Object
         {
-            _resourceLoaderService.UnloadResources(key);
+            return _assetServiceResolver.Resolve<T>();
         }
-
-        #endregion
     }
 }
