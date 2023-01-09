@@ -1,10 +1,10 @@
 namespace MapModule
 {
-    public class HexagonalMapModel : IMapModel
+    public class HexagonalCircleMapModel : IMapModel
     {
         public MapTile RootTile { get; }
 
-        public HexagonalMapModel(MapTile rootTile)
+        public HexagonalCircleMapModel(MapTile rootTile)
         {
             RootTile = rootTile;
         }

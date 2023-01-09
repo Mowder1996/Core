@@ -1,31 +1,18 @@
-using System;
 using System.Collections.Generic;
 using Common.Interfaces;
 using UnityEngine;
 
 namespace MapModule
 {
-    public struct MapTile : IIdentified
+    public class MapTile : IIdentified
     {
-        public Dictionary<int, MapTile> ChainedTiles;
-        public Vector3 Center;
-        public List<Vector3> Bounds;
+        public Dictionary<int, MapTile> ChainedTiles { get; protected set; }
+        public Vector3 Center { get; protected set; }
+        public Quaternion Orientation { get; protected set; }
+        public List<Vector3> Bounds { get; protected set; }
+        public string Id { get; protected set; }
 
-        public string Id => Guid.NewGuid().ToString();
-
-        public MapTile(Vector3 center, List<Vector3> bounds, Dictionary<int, MapTile> chainedTiles) : this(center, bounds)
-        {
-            ChainedTiles = chainedTiles;
-        }
-        
-        public MapTile(Vector3 center, List<Vector3> bounds)
-        {
-            ChainedTiles = new Dictionary<int, MapTile>();
-            Center = center;
-            Bounds = bounds;
-        }
-
-        public void AddChainedTile(int index, MapTile mapTile)
+        public virtual void AddChainedTile(int index, MapTile mapTile)
         {
             if (ChainedTiles.ContainsKey(index))
             {
