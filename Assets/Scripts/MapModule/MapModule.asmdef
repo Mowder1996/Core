@@ -1,0 +1,17 @@
+{
+    "name": "MapModule",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ad02be6fbe349fd458c33fabf1edd522",
+        "GUID:0d8beb7f090555447a6cf5ce9e54dbb4"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

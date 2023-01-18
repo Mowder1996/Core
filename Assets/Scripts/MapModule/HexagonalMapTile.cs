@@ -1,46 +1,54 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace MapModule
 {
-    public class HexagonalMapTile : MapTile
+    public class HexagonalMapTile : BaseMapTile
     {
-        private const float Cos30Const = 0.866f;
-        private const int EdgeAngle = 60;
-        private const int EdgeCount = 6;
+        private readonly string[] _chainedTileIds = new string[6];
         
-        public HexagonalMapTile(Vector3 center, Quaternion orientation, Dictionary<int, MapTile> chainedTiles)
-            : this(center, orientation)
-        {
-            ChainedTiles = chainedTiles;
-        }
-        
-        public HexagonalMapTile(Vector3 center, Quaternion orientation)
-        {
-            Id = Guid.NewGuid().ToString();
-            ChainedTiles = new Dictionary<int, MapTile>();
-            Center = center;
-            Orientation = orientation;
-            Bounds = CreateBounds(center, orientation, 1);
-        }
-        
-        private List<Vector3> CreateBounds(Vector3 center, Quaternion orientation, float size)
-        {
-            var bounds = new List<Vector3>();
-            
-            var pointVector = size / Cos30Const * Vector3.forward;
-            var pointOrientation = orientation * Quaternion.AngleAxis(EdgeAngle / 2f, Vector3.up);
-            var rotateQuaternion = Quaternion.AngleAxis(EdgeAngle, Vector3.up);
+        private Quaternion _orientation;
 
-            for (var i = 0; i < EdgeCount; i++)
+        public Quaternion Orientation => _orientation;
+
+        public void AddChainedTile(int index, HexagonalMapTile mapTile)
+        {
+            if (HasChainedTileInternal(index))
             {
-                bounds.Add(center + pointOrientation * pointVector);
-
-                pointOrientation *= rotateQuaternion;
+                return;
             }
 
-            return bounds;
+            _chainedTileIds[index] = mapTile.Id;
+            
+            base.AddChainedTile(mapTile);
+        }
+
+        public void SetOrientation(Quaternion orientation)
+        {
+            _orientation = orientation;
+        }
+
+        public HexagonalMapTile GetTileByIndex(int index)
+        {
+            if (!HasChainedTileInternal(index))
+            {
+                return null;
+            }
+
+            var tileId = _chainedTileIds[index];
+
+            return (HexagonalMapTile)GetTileById(tileId);
+        }
+        
+        public bool HasChainedTile(int index)
+        {
+            return HasChainedTileInternal(index);
+        }
+
+        private bool HasChainedTileInternal(int index)
+        {
+            var isIndexCorrect = index >= 0 && index < _chainedTileIds.Length;
+            
+            return isIndexCorrect && !string.IsNullOrEmpty(_chainedTileIds[index]);
         }
     }
 }

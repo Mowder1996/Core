@@ -12,16 +12,39 @@ namespace MapModule
         public List<Vector3> Bounds { get; protected set; }
         public string Id { get; protected set; }
 
-        public virtual void AddChainedTile(int index, MapTile mapTile)
+        public void SetCenter(Vector3 center)
         {
-            if (ChainedTiles.ContainsKey(index))
+            Center = center;
+        }
+        
+        public void AddChainedTile(int index, MapTile mapTile)
+        {
+            if (HasChainedTile(index))
             {
-                ChainedTiles[index] = mapTile;
-                
                 return;
             }
             
+            AddChainedTileInternal(index, mapTile);
+        }
+        
+        public void AddChainedTile(MapTile mapTile)
+        {
+            AddChainedTileInternal(mapTile);
+        }
+
+        protected virtual void AddChainedTileInternal(MapTile mapTile)
+        {
+            AddChainedTileInternal(0, mapTile);
+        }
+        
+        protected virtual void AddChainedTileInternal(int index, MapTile mapTile)
+        {
             ChainedTiles.Add(index, mapTile);
+        }
+        
+        protected virtual bool HasChainedTile(int index)
+        {
+            return ChainedTiles.ContainsKey(index);
         }
     }
 }

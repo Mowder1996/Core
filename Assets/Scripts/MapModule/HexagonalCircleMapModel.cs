@@ -2,14 +2,14 @@ namespace MapModule
 {
     public class HexagonalCircleMapModel : IMapModel
     {
-        public MapTile RootTile { get; }
+        public IMapTile RootTile { get; }
 
-        public HexagonalCircleMapModel(MapTile rootTile)
+        public HexagonalCircleMapModel(IMapTile rootTile)
         {
             RootTile = rootTile;
         }
 
-        public MapTile GetTileById(string id)
+        public IMapTile GetTileById(string id)
         {
             return RootTile;
         }

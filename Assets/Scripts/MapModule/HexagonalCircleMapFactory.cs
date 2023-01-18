@@ -5,29 +5,30 @@ namespace MapModule
 {
     public class HexagonalCircleMapFactory : IMapFactory
     {
+        private const float Cos30Const = 0.866f;
         private const int EdgeAngle = 60;
         private const int EdgeCount = 6;
         
-        public IMapModel Create()
+        public virtual IMapModel Create()
         {
             var rootTile = CreateTile(Vector3.zero, Quaternion.identity);
-            var baseLayer = new List<MapTile>() { rootTile };
+            var baseLayer = new List<HexagonalMapTile>() { rootTile };
 
             for (var i = 0; i < 3; i++)
             {
-                baseLayer = (List<MapTile>) CreateOuterLayer(baseLayer);
+                baseLayer = CreateSurroundTiles(baseLayer);
             }
             
             return new HexagonalCircleMapModel(rootTile);
         }
 
-        private IEnumerable<MapTile> CreateOuterLayer(IEnumerable<MapTile> mapLayer)
+        private List<HexagonalMapTile> CreateSurroundTiles(List<HexagonalMapTile> mapLayer)
         {
-            var outerLayer = new List<MapTile>();
+            var outerLayer = new List<HexagonalMapTile>();
             
             foreach (var tile in mapLayer)
             {
-                var localOuterLayer = CreateOuterLayer(tile);
+                var localOuterLayer = CreateSurroundTiles(tile);
                 
                 outerLayer.AddRange(localOuterLayer);
             }
@@ -35,13 +36,15 @@ namespace MapModule
             return outerLayer;
         }
 
-        private IEnumerable<MapTile> CreateOuterLayer(MapTile mapTile)
+        private List<HexagonalMapTile> CreateSurroundTiles(HexagonalMapTile mapTile)
         {
+            var outerLayer = new List<HexagonalMapTile>();
+            
             var centerVector = 2 * Vector3.forward;
 
             for (var i = 0; i < EdgeCount; i++)
             {
-                if (mapTile.ChainedTiles.ContainsKey(i))
+                if (mapTile.HasChainedTile(i))
                 {
                     continue;
                 }
@@ -50,35 +53,67 @@ namespace MapModule
                 var center = mapTile.Center + orientation * centerVector;
                 var tile = CreateTile(center, orientation);
                 
+                outerLayer.Add(tile);
+                
                 tile.AddChainedTile(3, mapTile);
                 mapTile.AddChainedTile(i, tile);
             
-                var previousIndex = (mapTile.ChainedTiles.Count + (i - 1)) % mapTile.ChainedTiles.Count;
-                var nextIndex = (mapTile.ChainedTiles.Count + (i + 1)) % mapTile.ChainedTiles.Count;
+                var previousIndex = (EdgeCount + (i - 1)) % EdgeCount;
+                var nextIndex = (EdgeCount + (i + 1)) % EdgeCount;
             
-                if (mapTile.ChainedTiles.ContainsKey(previousIndex))
+                if (mapTile.HasChainedTile(previousIndex))
                 {
-                    mapTile.ChainedTiles[previousIndex].AddChainedTile(2, tile);
-                    tile.AddChainedTile(4, mapTile.ChainedTiles[previousIndex]);
+                    var previousIndexTile = mapTile.GetTileByIndex(previousIndex);
+
+                    if (previousIndexTile != null)
+                    {
+                        previousIndexTile.AddChainedTile(2, tile);
+                        tile.AddChainedTile(4, previousIndexTile);
+                    }
                 }
             
-                if (mapTile.ChainedTiles.ContainsKey(nextIndex))
+                if (mapTile.HasChainedTile(nextIndex))
                 {
-                    mapTile.ChainedTiles[nextIndex].AddChainedTile(4, tile);
-                    tile.AddChainedTile(2, mapTile.ChainedTiles[nextIndex]);
+                    var nextIndexTile = mapTile.GetTileByIndex(nextIndex);
+
+                    if (nextIndexTile != null)
+                    {
+                        nextIndexTile.AddChainedTile(4, tile);
+                        tile.AddChainedTile(2, nextIndexTile);
+                    }
                 }
             }
 
-            return mapTile.ChainedTiles.Values;
+            return outerLayer;
         }
 
-        private MapTile CreateTile(Vector3 center, Quaternion orientation)
+        private HexagonalMapTile CreateTile(Vector3 center, Quaternion orientation)
         {
-            var tile = new HexagonalMapTile(center, orientation);
+            var tile = new HexagonalMapTile();
+            tile.SetCenter(center);
+            tile.SetOrientation(orientation);
+
+            var bounds = CreateBounds(center, orientation, 1);
+            tile.SetBounds(bounds);
 
             return tile;
         }
-        
 
+        private List<Vector3> CreateBounds(Vector3 center, Quaternion orientation, float size)
+        {
+            var bounds = new List<Vector3>();
+            var pointVector = size / Cos30Const * Vector3.forward;
+            var pointOrientation = orientation * Quaternion.AngleAxis(EdgeAngle / 2f, Vector3.up);
+            var rotateQuaternion = Quaternion.AngleAxis(EdgeAngle, Vector3.up);
+
+            for (var i = 0; i < EdgeCount; i++)
+            {
+                bounds.Add(center + pointOrientation * pointVector);
+
+                pointOrientation *= rotateQuaternion;
+            }
+
+            return bounds;
+        }
     }
 }
